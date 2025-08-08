@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Tailoring Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.5/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title .step {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .input-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .tab-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            border-color: #667eea;
+        }
+        
+        .input-area {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        .input-area:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .url-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .url-input input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .url-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .fetch-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .fetch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .fetch-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: 40px;
+            border: 3px dashed #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        
+        .file-upload-label:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+        
+        .file-upload-label.has-file {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+        
+        .file-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .additional-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-group label {
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .results-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .alignment-score {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .matched-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .download-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .download-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .download-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .download-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .download-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .download-btn:hover {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .preview-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+        }
+        
+        .preview-content h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .preview-content h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .preview-content ul {
+            margin-left: 20px;
+        }
+        
+        .preview-content li {
+            margin-bottom: 8px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .additional-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .download-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function ResumeTailorTool() {
+            const [jobInputType, setJobInputType] = useState('paste');
+            const [jobUrl, setJobUrl] = useState('');
+            const [jobDescription, setJobDescription] = useState('');
+            const [resumeFile, setResumeFile] = useState(null);
+            const [resumeText, setResumeText] = useState('');
+            const [jobTitle, setJobTitle] = useState('');
+            const [salaryRequirement, setSalaryRequirement] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [fetchingJob, setFetchingJob] = useState(false);
+            const [results, setResults] = useState(null);
+            const [error, setError] = useState('');
+            const [warning, setWarning] = useState('');
+            
+            // Parse PDF file
+            const parsePDF = async (file) => {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = '';
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n';
+                }
+                
+                return fullText;
+            };
+            
+            // Parse text file
+            const parseText = async (file) => {
+                return await file.text();
+            };
+            
+            // Handle file upload
+            const handleFileUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                setResumeFile(file);
+                setError('');
+                
+                try {
+                    let text = '';
+                    if (file.type === 'application/pdf') {
+                        text = await parsePDF(file);
+                    } else if (file.type === 'text/plain') {
+                        text = await parseText(file);
+                    } else {
+                        setError('Please upload a PDF or TXT file');
+                        return;
+                    }
+                    setResumeText(text);
+                } catch (err) {
+                    setError('Error reading file. Please try again.');
+                    console.error(err);
+                }
+            };
+            
+            // Simulate fetching job description from URL
+            const fetchJobDescription = async () => {
+                setFetchingJob(true);
+                setError('');
+                
+                // Simulate API call to fetch and parse job description
+                setTimeout(() => {
+                    // This is a simulation - in production, you'd actually scrape the URL
+                    const simulatedJobDescription = `
+Senior Software Engineer - Full Stack
+
+We are seeking an experienced Full Stack Software Engineer to join our growing team.
+
+Responsibilities:
+• Design and develop scalable web applications using React and Node.js
+• Collaborate with cross-functional teams to define and implement new features
+• Write clean, maintainable code with comprehensive test coverage
+• Mentor junior developers and conduct code reviews
+• Participate in system architecture decisions
+
+Requirements:
+• 5+ years of experience in software development
+• Strong proficiency in JavaScript, React, Node.js
+• Experience with cloud platforms (AWS, Azure, or GCP)
+• Familiarity with CI/CD pipelines and DevOps practices
+• Excellent problem-solving and communication skills
+• Bachelor's degree in Computer Science or related field
+
+Nice to have:
+• Experience with TypeScript
+• Knowledge of containerization (Docker, Kubernetes)
+• Experience with microservices architecture
+                    `;
+                    setJobDescription(simulatedJobDescription);
+                    setJobInputType('paste');
+                    setFetchingJob(false);
+                }, 1500);
+            };
+            
+            // Extract skills from text
+            const extractSkills = (text) => {
+                const commonSkills = [
+                    'JavaScript', 'Python', 'Java', 'React', 'Node.js', 'SQL', 'AWS', 'Docker',
+                    'Git', 'Agile', 'TypeScript', 'MongoDB', 'PostgreSQL', 'REST API', 'GraphQL',
+                    'CI/CD', 'Kubernetes', 'Machine Learning', 'Data Analysis', 'Project Management',
+                    'Leadership', 'Communication', 'Problem Solving', 'Team Collaboration',
+                    'Azure', 'GCP', 'HTML', 'CSS', 'Vue.js', 'Angular', 'Spring Boot', 'DevOps',
+                    'Microservices', 'Test Driven Development', 'Scrum', 'APIs', 'Cloud Computing'
+                ];
+                
+                const foundSkills = [];
+                const lowerText = text.toLowerCase();
+                
+                commonSkills.forEach(skill => {
+                    if (lowerText.includes(skill.toLowerCase())) {
+                        foundSkills.push(skill);
+                    }
+                });
+                
+                return foundSkills;
+            };
+            
+            // Calculate alignment score
+            const calculateAlignment = (resumeSkills, jobSkills) => {
+                if (jobSkills.length === 0) return 0;
+                
+                const matches = resumeSkills.filter(skill => 
+                    jobSkills.some(jobSkill => 
+                        skill.toLowerCase() === jobSkill.toLowerCase()
+                    )
+                );
+                
+                return Math.round((matches.length / jobSkills.length) * 100);
+            };
+            
+            // Generate tailored resume
+            const generateTailoredResume = (originalResume, jobDesc, matchedSkills) => {
+                const jobSkills = extractSkills(jobDesc);
+                
+                // Create a professional summary
+                const summary = `Experienced professional with expertise in ${matchedSkills.slice(0, 5).join(', ')}. Seeking ${jobTitle || 'position'} role where I can leverage my skills to contribute to organizational success.`;
+                
+                // This is a simplified version - in production, you'd use NLP to better tailor content
+                let tailoredResume = `${jobTitle || 'Professional'}\n\nPROFESSIONAL SUMMARY\n${summary}\n\nKEY SKILLS\n`;
+                tailoredResume += matchedSkills.join(' • ') + '\n\n';
+                
+                // Add relevant sections from original resume
+                // Priority order based on job requirements
+                const sections = ['EXPERIENCE', 'EDUCATION', 'PROJECTS', 'CERTIFICATIONS'];
+                
+                sections.forEach(section => {
+                    const regex = new RegExp(`${section}[:\\s]([\\s\\S]*?)(?=\\n[A-Z]+:|$)`, 'i');
+                    const match = originalResume.match(regex);
+                    if (match) {
+                        tailoredResume += `${section}\n${match[1].trim()}\n\n`;
+                    }
+                });
+                
+                return tailoredResume;
+            };
+            
+            // Generate cover letter
+            const generateCoverLetter = (matchedSkills) => {
+                const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                
+                return `${date}
+
+Dear Hiring Manager,
+
+I am writing to express my strong interest in the ${jobTitle || 'position'} role at your organization. With my extensive experience in ${matchedSkills.slice(0, 3).join(', ')}, I am confident in my ability to contribute effectively to your team.
+
+Throughout my career, I have developed strong competencies in ${matchedSkills.slice(0, 5).join(', ')}. These skills align perfectly with the requirements outlined in your job posting, positioning me as an ideal candidate for this role.
+
+Key highlights of my qualifications include:
+• Proven expertise in ${matchedSkills[0] || 'relevant technologies'}
+• Strong background in ${matchedSkills[1] || 'problem-solving'}
+• Demonstrated ability in ${matchedSkills[2] || 'team collaboration'}
+
+I am particularly drawn to this opportunity because it allows me to leverage my skills while contributing to meaningful projects. ${salaryRequirement ? `Regarding compensation, my salary requirement is ${salaryRequirement}.` : ''}
+
+I would welcome the opportunity to discuss how my experience and skills can contribute to your team's success. Thank you for considering my application.
+
+Sincerely,
+[Your Name]`;
+            };
+            
+            // Generate PDF
+            const generatePDF = (content, filename) => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const lines = doc.splitTextToSize(content, 170);
+                let y = 20;
+                
+                lines.forEach(line => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    doc.text(line, 20, y);
+                    y += 7;
+                });
+                
+                doc.save(filename);
+            };
+            
+            // Generate Word document
+            const generateWord = async (content, filename) => {
+                const docx = window.docx;
+                const doc = new docx.Document({
+                    sections: [{
+                        properties: {},
+                        children: content.split('\n').map(line => 
+                            new docx.Paragraph({
+                                text: line,
+                                spacing: { after: 120 }
+                            })
+                        )
+                    }]
+                });
+                
+                const blob = await docx.Packer.toBlob(doc);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+            };
+            
+            // Handle generation
+            const handleGenerate = () => {
+                if (!resumeText) {
+                    setError('Please upload your resume');
+                    return;
+                }
+                
+                if (!jobDescription) {
+                    setError('Please provide a job description');
+                    return;
+                }
+                
+                setLoading(true);
+                setError('');
+                setWarning('');
+                
+                setTimeout(() => {
+                    const resumeSkills = extractSkills(resumeText);
+                    const jobSkills = extractSkills(jobDescription);
+                    const matchedSkills = resumeSkills.filter(skill => 
+                        jobSkills.some(jobSkill => 
+                            skill.toLowerCase() === jobSkill.toLowerCase()
+                        )
+                    );
+                    
+                    const alignmentScore = calculateAlignment(resumeSkills, jobSkills);
+                    
+                    if (alignmentScore < 20) {
+                        setWarning('Low alignment detected. There might not be enough overlap between your experience and this role. Consider whether this position aligns with your career goals.');
+                    }
+                    
+                    const tailoredResume = generateTailoredResume(resumeText, jobDescription, matchedSkills);
+                    const coverLetter = generateCoverLetter(matchedSkills);
+                    
+                    setResults({
+                        alignmentScore,
+                        matchedSkills,
+                        tailoredResume,
+                        coverLetter
+                    });
+                    
+                    setLoading(false);
+                }, 2000);
+            };
+            
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1>🎯 Resume Tailoring Tool</h1>
+                        <p>Customize your resume and cover letter for any job opportunity</p>
+                    </div>
+                    
+                    <div className="main-card">
+                        {/* Job Description Input */}
+                        <div className="input-section">
+                            <h2 className="section-title">
+                                <span className="step">1</span>
+                                Job Description
+                            </h2>
+                            
+                            <div className="input-tabs">
+                                <button 
+                                    className={`tab-btn ${jobInputType === 'paste' ? 'active' : ''}`}
+                                    onClick={() => setJobInputType('paste')}
+                                >
+                                    📋 Paste Description
+                                </button>
+                                <button 
+                                    className={`tab-btn ${jobInputType === 'url' ? 'active' : ''}`}
+                                    onClick={() => setJobInputType('url')}
+                                >
+                                    🔗 Enter URL
+                                </button>
+                            </div>
+                            
+                            {jobInputType === 'paste' ? (
+                                <textarea
+                                    className="input-area"
+                                    placeholder="Paste the complete job description here..."
+                                    value={jobDescription}
+                                    onChange={(e) => setJobDescription(e.target.value)}
+                                />
+                            ) : (
+                                <div className="url-input">
+                                    <input
+                                        type="url"
+                                        placeholder="https://example.com/job-posting"
+                                        value={jobUrl}
+                                        onChange={(e) => setJobUrl(e.target.value)}
+                                    />
+                                    <button 
+                                        className="fetch-btn"
+                                        onClick={fetchJobDescription}
+                                        disabled={!jobUrl || fetchingJob}
+                                    >
+                                        {fetchingJob ? <span className="loading"></span> : 'Fetch'}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Resume Upload */}
+                        <div className="input-section">
+                            <h2 className="section-title">
+                                <span className="step">2</span>
+                                Your Resume
+                            </h2>
+                            
+                            <div className="file-upload">
+                                <input
+                                    type="file"
+                                    accept=".pdf,.txt"
+                                    onChange={handleFileUpload}
+                                    id="resume-upload"
+                                />
+                                <label htmlFor="resume-upload" className={`file-upload-label ${resumeFile ? 'has-file' : ''}`}>
+                                    <div className="file-icon">📄</div>
+                                    <div>
+                                        {resumeFile ? (
+                                            <>
+                                                <strong>{resumeFile.name}</strong>
+                                                <br />
+                                                <small>Click to change file</small>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <strong>Drop your resume here or click to browse</strong>
+                                                <br />
+                                                <small>Supports PDF and TXT files</small>
+                                            </>
+                                        )}
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        {/* Additional Information */}
+                        <div className="input-section">
+                            <h2 className="section-title">
+                                <span className="step">3</span>
+                                Additional Details (Optional)
+                            </h2>
+                            
+                            <div className="additional-info">
+                                <div className="input-group">
+                                    <label>Job Title</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., Senior Software Engineer"
+                                        value={jobTitle}
+                                        onChange={(e) => setJobTitle(e.target.value)}
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label>Salary Requirement</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., $120,000 - $140,000"
+                                        value={salaryRequirement}
+                                        onChange={(e) => setSalaryRequirement(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Generate Button */}
+                        <button 
+                            className="generate-btn"
+                            onClick={handleGenerate}
+                            disabled={loading || !resumeText || !jobDescription}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="loading"></span> Generating...
+                                </>
+                            ) : (
+                                '🚀 Generate Tailored Resume & Cover Letter'
+                            )}
+                        </button>
+                        
+                        {/* Alerts */}
+                        {error && (
+                            <div className="alert alert-error">
+                                ⚠️ {error}
+                            </div>
+                        )}
+                        
+                        {warning && (
+                            <div className="alert alert-warning">
+                                ⚠️ {warning}
+                            </div>
+                        )}
+                        
+                        {/* Results Section */}
+                        {results && (
+                            <div className="results-section">
+                                <div className="alignment-score">
+                                    <h3>Alignment Score</h3>
+                                    <div className="score-value">{results.alignmentScore}%</div>
+                                    <div>Matched Skills</div>
+                                    <div className="matched-skills">
+                                        {results.matchedSkills.map((skill, index) => (
+                                            <span key={index} className="skill-tag">{skill}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="download-section">
+                                    <div className="download-card">
+                                        <h3>📄 Tailored Resume</h3>
+                                        <div className="download-buttons">
+                                            <button 
+                                                className="download-btn"
+                                                onClick={() => generatePDF(results.tailoredResume, 'tailored_resume.pdf')}
+                                            >
+                                                PDF
+                                            </button>
+                                            <button 
+                                                className="download-btn"
+                                                onClick={() => generateWord(results.tailoredResume, 'tailored_resume.docx')}
+                                            >
+                                                Word
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="download-card">
+                                        <h3>✉️ Cover Letter</h3>
+                                        <div className="download-buttons">
+                                            <button 
+                                                className="download-btn"
+                                                onClick={() => generatePDF(results.coverLetter, 'cover_letter.pdf')}
+                                            >
+                                                PDF
+                                            </button>
+                                            <button 
+                                                className="download-btn"
+                                                onClick={() => generateWord(results.coverLetter, 'cover_letter.docx')}
+                                            >
+                                                Word
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="preview-section">
+                                    <h3>Preview - Tailored Resume</h3>
+                                    <div className="preview-content">
+                                        <pre style={{whiteSpace: 'pre-wrap', fontFamily: 'inherit'}}>
+                                            {results.tailoredResume}
+                                        </pre>
+                                    </div>
+                                </div>
+                                
+                                <div className="preview-section">
+                                    <h3>Preview - Cover Letter</h3>
+                                    <div className="preview-content">
+                                        <pre style={{whiteSpace: 'pre-wrap', fontFamily: 'inherit'}}>
+                                            {results.coverLetter}
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
+        // Render the app
+        ReactDOM.render(<ResumeTailorTool />, document.getElementById('root'));
+    </script>
+</body>
+</html>
