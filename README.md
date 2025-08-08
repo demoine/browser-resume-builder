@@ -4,7 +4,7 @@ A powerful, browser-based resume builder that requires no installations. Built w
 
 ## 🎥 Video Tutorial
 
-**[Watch the Complete Build Tutorial] https://youtu.be/B6jkyyeT4_s**
+**[Watch the Complete Build Tutorial](https://youtu.be/B6jkyyeT4_s)**
 
 Learn how I built this entire application from scratch using AI prompts and modern web technologies.
 
@@ -35,18 +35,29 @@ Learn how I built this entire application from scratch using AI prompts and mode
 
 ## 🔧 How to Use
 
+**Prerequisites:**
+- 📄 **Have your existing resume ready** - Download your resume from LinkedIn (PDF format works best)
+- 🌐 **Modern web browser** (Chrome, Firefox, Safari, Edge)
+
+**Steps:**
 1. **Download** the `resume-builder.html` file
-2. **Open it** in any modern browser (Chrome, Firefox, Safari, Edge)
-3. **Fill out the form** with your information
-4. **Generate and download** your professional resume!
+2. **Open it** in any modern browser
+3. **Upload your existing resume** (or download yours from LinkedIn first)
+4. **Edit and enhance** your information using the form
+5. **Generate and download** your newly formatted professional resume!
+
+*💡 Pro Tip: LinkedIn allows you to download your profile as a PDF - this makes a great starting point!*
 
 *No server required - works completely offline!*
 
 ## 🚀 Quick Start
 
 ```bash
-# Option 1: Download single file
-# Just download resume-builder.html and open in browser
+# Option 1: Download single file (Recommended for most users)
+# 1. Download resume-builder.html 
+# 2. Download your resume from LinkedIn (Profile → More → Save to PDF)
+# 3. Open resume-builder.html in browser
+# 4. Upload your LinkedIn resume and enhance it!
 
 # Option 2: Clone entire repository
 git clone https://github.com/YOUR_USERNAME/browser-resume-builder.git
