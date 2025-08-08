@@ -4,7 +4,7 @@ A powerful, browser-based resume builder that requires no installations. Built w
 
 ## 🎥 Video Tutorial
 
-**[Watch the Complete Build Tutorial](YOUR_VIDEO_LINK_HERE)**
+**[Watch the Complete Build Tutorial] https://youtu.be/B6jkyyeT4_s**
 
 Learn how I built this entire application from scratch using AI prompts and modern web technologies.
 
